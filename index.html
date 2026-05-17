@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis-Link v10.0 - Full AI Game Master</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="fx-overlay" class="fx-overlay">
+        <h1 id="game-over-text" style="display: none;">SYSTEM DESTROYED<br><span style="font-size: 0.5em;">全舰覆没</span></h1>
+    </div>
+
+    <div class="cockpit-grid">
+        <header class="top-bar">
+            <div class="status-block">
+                <h3>我方装甲 (HULL) <span id="player-evasion" class="stat-highlight">闪避: 0%</span></h3>
+                <div class="hp-bar"><div id="player-hp-fill" style="width: 100%; background: #00ff00;"></div></div>
+                <span id="player-hp-text">100 / 100</span>
+            </div>
+            <div class="status-block center-block">
+                <h1>AEGIS-LINK // 战术指挥系统_v10.0</h1>
+                <p id="game-phase-text" class="phase-stealth">隐蔽巡航模式 (STEALTH)</p>
+            </div>
+            <div class="status-block enemy-block" id="enemy-status" style="opacity: 0.2;">
+                <h3>未确认目标 <span id="player-accuracy" class="stat-highlight">命中率: 100%</span></h3>
+                <div class="hp-bar"><div id="enemy-hp-fill" style="width: 100%; background: #ff0055;"></div></div>
+                <span id="enemy-hp-text">? / ?</span>
+            </div>
+        </header>
+
+        <div class="meters-panel">
+            <div class="meter-box">
+                <div class="meter-header">主反应堆 <span id="cap-net" class="rate-text"></span></div>
+                <div class="bar-bg"><div id="cap-bar-fill" class="fill cyan" style="width: 100%;"></div></div>
+            </div>
+            <div class="meter-box">
+                <div class="meter-header">热信号源 <span id="heat-warning" class="warning-text"></span></div>
+                <div class="bar-bg"><div id="heat-bar-fill" class="fill orange" style="width: 15%;"></div></div>
+            </div>
+            <div class="meter-box screen-dark">
+                <div class="nav-data">
+                    <div style="font-size: 0.75em; color: #888;">舰体相对航速 (VELOCITY)</div>
+                    <div style="font-size: 1.3rem; margin-top: 2px;"><span id="velocity-val" class="cyan-text">0</span> <span style="font-size: 0.5em; color: #888;">km/s</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ops-area">
+            <div class="panel controls-panel">
+                <h2>动力与火控系统</h2>
+                <div class="control-row">
+                    <label>引擎节流阀 (提供加速度)</label>
+                    <div class="flex-row">
+                        <span id="engine-power-val">0%</span>
+                        <input type="range" id="engine-slider" min="0" max="100" value="0">
+                    </div>
+                    <button class="sys-btn brake-btn" id="btn-brake">⚠️ 紧急反推减速 (按住)</button>
+                </div>
+                <div class="control-row">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>主炮矩阵充能速率</span>
+                        <span class="range-info-text">[射程: 8000 km]</span>
+                    </label>
+                    <div class="flex-row">
+                        <span id="weapon-val">0%</span>
+                        <input type="range" id="weapon-slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="weapon-bar"><div id="weapon-charge-fill" style="width:0%;"></div></div>
+                    <button class="sys-btn danger" id="btn-fire" disabled>开火射击 (需100%且在射程内)</button>
+                </div>
+                <div class="control-row" style="margin-top:auto;">
+                    <button class="sys-btn parry-btn" id="btn-shield">偏导力场展开 (1秒弹反)</button>
+                </div>
+            </div>
+
+            <div class="panel tactical-panel">
+                <h2>态势感知</h2>
+                <div class="tactical-visuals">
+                    <div class="radar-group">
+                        <div class="radar-display" id="radar">
+                            <div class="radar-sweep"></div>
+                            <div class="enemy-blip" id="enemy-blip" style="display: none;"></div>
+                            <div class="range-ring"></div>
+                        </div>
+                        <div class="distance-display" id="distance-container">
+                            <span style="color:#888;">锁定距离:</span> <span id="distance-val" style="font-weight: bold;">---</span> <span style="font-size: 0.8em; color: #888;">km</span>
+                        </div>
+                        <button class="sys-btn" id="btn-radar">主动雷达扫掠 (-10电/+25热)</button>
+                    </div>
+                    <div class="warning-box" id="warning-box">
+                        <h3 id="warning-title">深空静默</h3>
+                        <p id="warning-desc">注意控制热信号，避免暴露。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel ewar-panel">
+                <h2>电子战博弈 (E-WARFARE)</h2>
+                <div class="ewar-tug-container">
+                    <span class="ewar-label enemy-label">致盲</span>
+                    <div class="ewar-bar-bg">
+                        <div id="ewar-marker" class="ewar-marker" style="left: 50%;"></div>
+                    </div>
+                    <span class="ewar-label player-label">瘫痪</span>
+                </div>
+                <div class="ewar-matrix" id="ewar-grid">
+                    <div class="ewar-node" data-id="0"></div><div class="ewar-node" data-id="1"></div><div class="ewar-node" data-id="2"></div>
+                    <div class="ewar-node" data-id="3"></div><div class="ewar-node" data-id="4"></div><div class="ewar-node" data-id="5"></div>
+                    <div class="ewar-node" data-id="6"></div><div class="ewar-node" data-id="7"></div><div class="ewar-node" data-id="8"></div>
+                </div>
+                <p style="font-size:0.75rem; color:#888; text-align:center; margin-top:8px;">拦截红点可推进控制进度<br>漏截将暴减进度并导致雷达致盲</p>
+            </div>
+        </div>
+
+        <div class="bottom-split">
+            <div class="panel log-panel">
+                <div class="panel-header">战术日志 (HISTORICAL LOGS)</div>
+                <div class="logs-container" id="narrative-logs">
+                    <p class="story-msg">星历2026：维生系统正常。全舰处于安全巡航状态，未侦测到威胁。</p>
+                </div>
+            </div>
+            
+            <div class="panel terminal-panel">
+                <div class="panel-header" style="color:var(--cyan); display: flex; justify-content: space-between; align-items: center;">
+                    <span>Aegis AI (高级神经漫游版)</span>
+                    <button id="btn-config-toggle" class="config-toggle-btn">⚙️ 接口配置</button>
+                </div>
+                
+                <div id="api-config-panel" class="api-config-panel">
+                    <div class="config-row">
+                        <label>云端 URL:</label>
+                        <input type="text" id="api-url" value="https://api.deepseek.com/chat/completions">
+                    </div>
+                    <div class="config-row">
+                        <label>云端模型:</label>
+                        <input type="text" id="api-model" value="deepseek-chat">
+                    </div>
+                    <div class="config-row">
+                        <label>API Key:</label>
+                        <input type="password" id="api-key" placeholder="填写以启用云端大模型 (可选)">
+                    </div>
+                    <div class="config-row" style="border-top: 1px dashed #444; padding-top: 5px; margin-top: 2px;">
+                        <label style="color:var(--orange);" title="云端失败或未填Key时，将自动调用本地模型">本地备选:</label>
+                        <input type="text" id="ollama-model" value="qwen2.5:1.5b">
+                        <button id="btn-save-config" class="sys-btn" style="width: auto; padding: 2px 10px; font-size:0.75rem; margin-left: 5px;">保存</button>
+                    </div>
+                </div>
+
+                <div class="logs-container" id="terminal-logs">
+                    <p class="system-msg">Aegis 神经控制代理已准备就绪。你可以与我闲聊，或下达战术指令。</p>
+                </div>
+                
+                <div class="ai-input-box">
+                    <button class="sys-btn mic-btn" id="btn-mic" title="点击麦克风说话">🎙️</button>
+                    <span class="prompt-arrow">></span>
+                    <input type="text" id="ai-command-input" placeholder="请说话，可闲聊，可控制飞船，可要求演习模拟...">
+                    <button class="sys-btn" id="btn-ai-send" style="padding: 6px 15px; width: auto;">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
