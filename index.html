@@ -3,31 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis-Link v10.7 - Kinetic Warfare</title>
+    <title>S.T.A.C.S. v1.0 - Tactical Command</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="init-screen" class="init-screen">
+        <div class="boot-container">
+            <h1 class="init-title">S.T.A.C.S. OS v1.0</h1>
+            <p class="init-subtitle">NEURAL LINK STANDBY // 等待指挥官授权</p>
+            <div class="init-data-stream" id="init-data-stream">Initializing core routines...</div>
+            <button id="btn-boot" class="sys-btn">SYSTEM BOOT // 启动系统</button>
+        </div>
+    </div>
+
     <canvas id="bg-particles"></canvas>
     <div class="scanlines"></div>
     
     <div id="fx-overlay" class="fx-overlay">
-        <h1 id="game-over-text" style="display: none;">HULL BREACHED<br><span style="font-size: 0.5em;">舰体解体</span></h1>
+        <h1 id="game-over-text" style="display: none;">CRITICAL FAILURE<br><span style="font-size: 0.5em;">舰体结构崩溃</span></h1>
     </div>
 
-    <div class="cockpit-grid" id="cockpit-grid">
+    <div class="cockpit-grid" id="cockpit-grid" style="filter: blur(20px); opacity: 0; transition: all 1.5s ease-out; pointer-events: none;">
         <header class="top-bar">
             <div class="status-block">
-                <h3>我方装甲 (HULL) <span id="player-evasion" class="stat-highlight">闪避: 0%</span></h3>
+                <h3>HULL INTEGRITY // 舰体装甲 <span id="player-evasion" class="stat-highlight">EVASION: 0%</span></h3>
                 <div class="hp-bar"><div id="player-hp-fill" style="width: 100%; background: #00ff00;"></div></div>
                 <span id="player-hp-text">100 / 100</span>
             </div>
             <div class="status-block center-block">
-                <h1>AEGIS-LINK // 战术指挥中心</h1>
-                <p id="game-phase-text" class="phase-stealth">隐蔽巡航模式 (STEALTH)</p>
+                <h1>S.T.A.C.S. // TACTICAL COMMAND</h1>
+                <p id="game-phase-text" class="phase-stealth">[ SYS_MODE: STEALTH // 隐蔽巡航 ]</p>
             </div>
             <div class="status-block enemy-block" id="enemy-status" style="opacity: 0.2;">
-                <h3>未确认目标 <span id="player-accuracy" class="stat-highlight">命中率: 100%</span></h3>
+                <h3>TARGET LOCK // 锁定目标 <span id="player-accuracy" class="stat-highlight">ACCURACY: 100%</span></h3>
                 <div class="hp-bar"><div id="enemy-hp-fill" style="width: 100%; background: #ff0055;"></div></div>
                 <span id="enemy-hp-text">? / ?</span>
             </div>
@@ -35,16 +44,16 @@
 
         <div class="meters-panel">
             <div class="meter-box">
-                <div class="meter-header">主反应堆 <span id="cap-net" class="rate-text"></span></div>
+                <div class="meter-header">REACTOR CAPACITOR // 主电容 <span id="cap-net" class="rate-text"></span></div>
                 <div class="bar-bg"><div id="cap-bar-fill" class="fill cyan" style="width: 100%;"></div></div>
             </div>
             <div class="meter-box">
-                <div class="meter-header">热信号源 <span id="heat-warning" class="warning-text"></span></div>
+                <div class="meter-header">THERMAL EMISSION // 热辐射 <span id="heat-warning" class="warning-text"></span></div>
                 <div class="bar-bg"><div id="heat-bar-fill" class="fill orange" style="width: 15%;"></div></div>
             </div>
             <div class="meter-box screen-dark">
                 <div class="nav-data">
-                    <div class="nav-label">舰体相对航速 (VELOCITY)</div>
+                    <div class="nav-label">RELATIVE VELOCITY // 相对标速</div>
                     <div class="nav-value"><span id="velocity-val" class="cyan-text">0</span> <span style="font-size: 0.4em; color: rgba(255,255,255,0.5);">km/s</span></div>
                 </div>
             </div>
@@ -52,38 +61,38 @@
 
         <div class="ops-area">
             <div class="panel controls-panel">
-                <h2>动力与火控系统</h2>
+                <h2>PROPULSION & WEAPONS // 动力与火控</h2>
                 
                 <div class="control-row">
-                    <label>引力波节流阀 (THRUST)</label>
+                    <label>MAIN THRUST // 引擎节流阀</label>
                     <div class="flex-row">
                         <span id="engine-power-val" class="slider-val">0%</span>
                         <input type="range" id="engine-slider" min="0" max="100" value="0">
                     </div>
-                    <button class="sys-btn brake-btn" id="btn-brake">⚠️ 紧急反推减速 (HOLD)</button>
+                    <button class="sys-btn brake-btn" id="btn-brake">⚠️ RETRO-THRUST // 紧急反推 [HOLD]</button>
                 </div>
                 
                 <div class="control-row">
                     <label style="display: flex; justify-content: space-between;">
-                        <span>电磁轨道主炮 (RAILGUN)</span>
-                        <span class="range-info-text">射程: 8000km</span>
+                        <span>RAILGUN ARRAY // 轨道炮矩阵</span>
+                        <span class="range-info-text">RANGE: 8000km</span>
                     </label>
                     <div class="flex-row">
                         <span id="weapon-val" class="slider-val">0%</span>
                         <input type="range" id="weapon-slider" min="0" max="100" value="0">
                     </div>
                     <div class="weapon-bar"><div id="weapon-charge-fill" style="width:0%;"></div></div>
-                    <button class="sys-btn danger" id="btn-fire" disabled>电磁加速点火 (FIRE)</button>
+                    <button class="sys-btn danger" id="btn-fire" disabled>KINETIC LAUNCH // 动能击发</button>
                 </div>
 
                 <div class="control-row" style="background: transparent; border: none; padding: 0; margin-top: 10px;">
-                    <button class="sys-btn parry-btn" id="btn-shield">偏导力场展开 (SHIELD)</button>
+                    <button class="sys-btn parry-btn" id="btn-shield">DEFLECTOR // 偏导场</button>
                 </div>
 
                 <div class="control-row" style="margin-top:auto;">
                     <label style="display: flex; justify-content: space-between;">
-                        <span style="color:var(--green);">纳米修复协议 (REPAIR)</span>
-                        <span class="range-info-text" style="color:var(--green); border-color:var(--green);">高热载</span>
+                        <span style="color:var(--green);">NANO-REPAIR PROTOCOL // 纳米修复</span>
+                        <span class="range-info-text" style="color:var(--green); border-color:var(--green);">HIGH-LOAD</span>
                     </label>
                     <div class="flex-row">
                         <span id="repair-val" class="slider-val" style="color:var(--green);">0%</span>
@@ -93,7 +102,7 @@
             </div>
 
             <div class="panel tactical-panel">
-                <h2>态势感知</h2>
+                <h2>TACTICAL SENSORS // 态势感知</h2>
                 <div class="tactical-visuals">
                     <div class="radar-group">
                         <div class="radar-display" id="radar">
@@ -103,25 +112,25 @@
                             <div class="range-ring"></div>
                         </div>
                         <div class="distance-display" id="distance-container">
-                            <span class="dist-label">LOCKED:</span> <span id="distance-val">---</span> <span class="dist-unit">km</span>
+                            <span class="dist-label">TELEMETRY:</span> <span id="distance-val">---</span> <span class="dist-unit">km</span>
                         </div>
-                        <button class="sys-btn" id="btn-radar">主动脉冲扫掠 (SCAN)</button>
+                        <button class="sys-btn" id="btn-radar">ACTIVE SONAR PING // 主动脉冲</button>
                         
                         <div id="attack-alert" class="attack-alert" style="display: none;">
-                            ⚠️ 动能弹体撞击倒计时: <span id="attack-countdown">0.0</span>s
+                            ⚠️ INCOMING IMPACT // 撞击倒数: <span id="attack-countdown">0.0</span>s
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="panel ewar-panel">
-                <h2>电子战博弈 (E-WARFARE)</h2>
+                <h2>CYBER WARFARE // 电子战矩阵</h2>
                 <div class="ewar-tug-container">
-                    <span class="ewar-label enemy-label">致盲</span>
+                    <span class="ewar-label enemy-label">BLIND</span>
                     <div class="ewar-bar-bg">
                         <div id="ewar-marker" class="ewar-marker" style="left: 50%;"></div>
                     </div>
-                    <span class="ewar-label player-label">瘫痪</span>
+                    <span class="ewar-label player-label">STUN</span>
                 </div>
                 <div class="ewar-matrix" id="ewar-grid">
                     <div class="ewar-node" data-id="0"></div><div class="ewar-node" data-id="1"></div><div class="ewar-node" data-id="2"></div>
@@ -131,43 +140,44 @@
                     <div class="ewar-node" data-id="12"></div><div class="ewar-node" data-id="13"></div><div class="ewar-node" data-id="14"></div>
                     <div class="ewar-node" data-id="15"></div><div class="ewar-node" data-id="16"></div><div class="ewar-node" data-id="17"></div>
                 </div>
+                <p style="font-size:0.7rem; color:#888; text-align:center; margin-top:8px; line-height: 1.3;">[ INTERCEPT RED NODES TO ADVANCE OVERRIDE ]<br>拦截红色流氓节点以推进火控劫持</p>
             </div>
         </div>
 
         <div class="bottom-split">
             <div class="panel log-panel">
-                <div class="panel-header">战术日志 (HISTORICAL LOGS)</div>
+                <div class="panel-header">COMBAT LOGS // 战术日志</div>
                 <div class="logs-container" id="narrative-logs">
-                    <p class="story-msg">星历2026：维生系统正常。静默巡航中。</p>
+                    <p class="story-msg">[ SYS_INIT ] Life support nominal. Stealth protocol active. // 维生正常，静默巡航。</p>
                 </div>
             </div>
             
             <div class="panel terminal-panel">
                 <div class="panel-header">
-                    <span>Aegis 全知副官 (AI PROXY)</span>
-                    <button id="btn-config-toggle" class="config-toggle-btn">CONFIG</button>
+                    <span>S.T.A.C.S. OVERSEER // 战术代理终端</span>
+                    <button id="btn-config-toggle" class="config-toggle-btn">SYS_CFG</button>
                 </div>
                 
                 <div id="api-config-panel" class="api-config-panel">
                     <div class="config-row"><label>URL:</label><input type="text" id="api-url" value="https://api.deepseek.com/chat/completions"></div>
                     <div class="config-row"><label>MODEL:</label><input type="text" id="api-model" value="deepseek-chat"></div>
-                    <div class="config-row"><label>KEY:</label><input type="password" id="api-key" placeholder="云端 API Key"></div>
+                    <div class="config-row"><label>KEY:</label><input type="password" id="api-key" placeholder="SECURE KEY"></div>
                     <div class="config-row" style="border-top: 1px solid #333; padding-top: 5px;">
                         <label style="color:var(--orange);">LOCAL:</label>
                         <input type="text" id="ollama-model" value="qwen2.5:1.5b">
-                        <button id="btn-save-config" class="sys-btn" style="width: 60px; padding: 2px;">保存</button>
+                        <button id="btn-save-config" class="sys-btn" style="width: 60px; padding: 2px;">APPLY</button>
                     </div>
                 </div>
 
                 <div class="logs-container" id="terminal-logs">
-                    <p class="system-msg">AI 神经元已接入。支持自然语言交接控制权。</p>
+                    <p class="system-msg">[ STACS_READY ] Neural link established. Awaiting input. // 神经链已建立，等待输入。</p>
                 </div>
                 
                 <div class="ai-input-box">
-                    <button class="sys-btn mic-btn" id="btn-mic" title="语音输入">🎙️</button>
+                    <button class="sys-btn mic-btn" id="btn-mic" title="VOICE COMM">🎙️</button>
                     <span class="prompt-arrow">_></span>
-                    <input type="text" id="ai-command-input" placeholder="输入控制指令 (如: 全速规避)...">
-                    <button class="sys-btn" id="btn-ai-send" style="width: auto;">EXECUTE</button>
+                    <input type="text" id="ai-command-input" placeholder="AWAITING COMMAND // 输入自然语言指令...">
+                    <button class="sys-btn" id="btn-ai-send" style="width: auto;">EXEC</button>
                 </div>
             </div>
         </div>
